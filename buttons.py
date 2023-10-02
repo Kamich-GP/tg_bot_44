@@ -21,3 +21,25 @@ def loc_button():
     kb.add(loc)
     return kb
 
+##Кнопки для админки##
+#Меню админки
+def admin_menu():
+    #Создаем пространство
+    kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    #Создаем кнопки
+    but1 = types.KeyboardButton('Добавить продукт')
+    but2 = types.KeyboardButton('Удалить продукт')
+    #Добавить кнопку в пространство
+    kb.add(but1, but2)
+    return kb
+
+#Кнопки потверждения удаления продукта
+def confirm():
+    # Создаем пространство
+    kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    # Создаем кнопки
+    but1 = types.KeyboardButton('Да')
+    but2 = types.KeyboardButton('Нет')
+    # Добавить кнопку в пространство
+    kb.add(but1, but2)
+    return kb

@@ -15,11 +15,13 @@ def start_message(message):
     check_user = db.checker(user_id)
     #Если есть
     if check_user:
-        bot.send_message(user_id, 'Добро пожаловать!')
+        bot.send_message(user_id, 'Добро пожаловать!',
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
     #Если нет
     else:
         bot.send_message(user_id, 'Добро пожаловать!\n'
-                                'Давайте начнем регистрацию! Введите имя')
+                                'Давайте начнем регистрацию! Введите имя',
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
         #Переход на этап получения имени
         bot.register_next_step_handler(message, get_name)
 
@@ -62,6 +64,88 @@ def get_loc(message, user_name, user_num):
     else:
         bot.send_message(user_id, 'Отправьте локацию, используя кнопку!')
         bot.register_next_step_handler(message, get_loc, user_name, user_num)
+
+
+##Админ панель##
+#Обработчик команды admin
+@bot.message_handler(commands=['admin'])
+def start_admin(message):
+    admin_id = 791555605
+    if message.from_user.id == admin_id:
+        bot.send_message(admin_id, 'Добро пожаловать! Выберите действие',
+                         reply_markup=bt.admin_menu())
+        #Переход на этап выбора
+        bot.register_next_step_handler(message, act)
+    else:
+        bot.send_message(message.from_user.id, 'Вы не админ!')
+#Этап выбора
+def act(message):
+    admin_id = 791555605
+    if message.text == 'Добавить продукт':
+        bot.send_message(admin_id, 'Введите название товара',
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
+        #Переход на этап получения названия
+        bot.register_next_step_handler(message, get_pr_name)
+    elif message.text == 'Удалить продукт':
+        check = db.check_products()
+        if check:
+            bot.send_message(admin_id, 'Введите id товара',
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
+            # Переход на этап получения id
+            bot.register_next_step_handler(message, get_pr_to_del)
+        else:
+            bot.send_message(admin_id, 'Товаров пока нет!')
+            # Переход на этап выбора
+            bot.register_next_step_handler(message, act)
+def get_pr_name(message):
+    admin_id = 791555605
+    product_name = message.text
+    bot.send_message(admin_id, 'А теперь напишите описание для продукта')
+    #Переход на этап получения описания
+    bot.register_next_step_handler(message, get_pr_des, product_name)
+def get_pr_des(message, product_name):
+    admin_id = 791555605
+    product_des = message.text
+    bot.send_message(admin_id, 'Какое количество товара есть?')
+    #Переход на этап получения кол-ва
+    bot.register_next_step_handler(message, get_pr_count, product_name, product_des)
+def get_pr_count(message, product_name, product_des):
+    admin_id = 791555605
+    product_count = int(message.text)
+    bot.send_message(admin_id, 'Сколько стоит товар?')
+    #Переход на этап получения цены
+    bot.register_next_step_handler(message, get_pr_price, product_name, product_des,
+                                   product_count)
+def get_pr_price(message, product_name, product_des, product_count):
+    admin_id = 791555605
+    product_price = float(message.text)
+    bot.send_message(admin_id, 'А теперь перейдите на сайт https://postimages.org/ru/,'
+                               ' загрузите фотографию и отправьте ссылку на фото!')
+    #Переход на этап получения ссылки
+    bot.register_next_step_handler(message, get_pr_photo, product_name,
+                                   product_des, product_count, product_price)
+def get_pr_photo(message, product_name, product_des, product_count, product_price):
+    admin_id = 791555605
+    product_photo = message.text
+    db.add_pr(product_name, product_des, product_count, product_price, product_photo)
+    bot.send_message(admin_id, 'Всё готово! Что-то еще?',
+                     reply_markup=bt.admin_menu())
+    #Переход на этап выбора
+    bot.register_next_step_handler(message, act)
+def get_pr_to_del(message):
+    admin_id = 791555605
+    id = int(message.text)
+    check = db.check_pr(id)
+    if check:
+        db.del_pr(id)
+        bot.send_message(admin_id, 'Всё готово! Что-то еще?',
+                         reply_markup=bt.admin_menu())
+        #Переход на этап выбора
+        bot.register_next_step_handler(message, act)
+    else:
+        bot.send_message(admin_id, 'Такого продукта нет!')
+        #Переход на этап получения id
+        bot.register_next_step_handler(message, get_pr_to_del)
 
 bot.polling(none_stop=True)
 

@@ -33,3 +33,33 @@ def checker(id):
         return True
     else:
         return False
+
+
+##Методы для продуктов##
+#Добавление
+def add_pr(name, des, count, price, photo):
+    sql.execute('INSERT INTO products(pr_name, pr_des, pr_count, pr_price, pr_photo) '
+                'VALUES(?, ?, ?, ?, ?);', (name, des, count, price, photo))
+    #Фиксируем изменения
+    connection.commit()
+#Удаление
+def del_pr(id):
+    sql.execute('DELETE FROM products WHERE id=?;', (id,))
+    #Фиксируем изменения
+    connection.commit()
+#Найти продукт по id
+def check_pr(id):
+    checker = sql.execute('SELECT id FROM products WHERE id=?;', (id,))
+    if checker:
+        return True
+    else:
+        return False
+
+#Проверка на наличие продуктов в базе
+def check_products():
+    checker = sql.execute('SELECT * FROM products;')
+    if checker:
+        return True
+    else:
+        return False
+
