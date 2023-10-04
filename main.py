@@ -3,7 +3,7 @@ import telebot, buttons as bt, database as db
 from geopy import Nominatim
 
 #Создаем объект бота
-bot = telebot.TeleBot('Ваш токен')
+bot = telebot.TeleBot('6407944506:AAEpMoGMxo4mxPnh0hFbdNxqmwnxKC9aEIU')
 #Использование карт
 geolocator = Nominatim(user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36')
 #Обработка команды старт
@@ -13,10 +13,14 @@ def start_message(message):
     user_id = message.from_user.id
     #Проверка на наличие юзера
     check_user = db.checker(user_id)
+    #Берем продукты из БД
+    products = db.get_pr_id()
     #Если есть
     if check_user:
         bot.send_message(user_id, 'Добро пожаловать!',
                          reply_markup=telebot.types.ReplyKeyboardRemove())
+        bot.send_message(user_id, 'Выберите пункт меню',
+                         reply_markup=bt.main_menu(products))
     #Если нет
     else:
         bot.send_message(user_id, 'Добро пожаловать!\n'
@@ -65,6 +69,15 @@ def get_loc(message, user_name, user_num):
         bot.send_message(user_id, 'Отправьте локацию, используя кнопку!')
         bot.register_next_step_handler(message, get_loc, user_name, user_num)
 
+#Вывод информации о продукте
+@bot.callback_query_handler(lambda call: int(call.data) in db.get_pr_name_id())
+def get_user_product(call):
+    chat_id = call.message.chat.id
+    prod = db.get_pr(int(call.data))
+    bot.send_photo(chat_id, photo=prod[4], caption=f'Название товара: {prod[0]}\n\n'
+                                                   f'Описание: {prod[1]}\n'
+                                                   f'Кол-во: {prod[2]}\n'
+                                                   f'Цена: {prod[3]}')
 
 ##Админ панель##
 #Обработчик команды admin

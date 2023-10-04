@@ -55,6 +55,20 @@ def check_pr(id):
     else:
         return False
 
+#Вывод названий продуктов с их id
+def get_pr_id():
+    return sql.execute('SELECT id, pr_name, pr_count FROM products;').fetchall()
+def get_pr_name_id():
+    products = sql.execute('SELECT id, pr_name, pr_count FROM products;').fetchall()
+    #Отсортировали продукты, кол-во которых больше 0
+    sorted_prods = [i[0] for i in products if i[2] > 0]
+    return sorted_prods
+#Вывести всю информацию о конкретном продукте
+def get_pr(id):
+    return sql.execute('SELECT pr_name, pr_des, pr_count, pr_price, pr_photo '
+                       'FROM products WHERE id=?;', (id,)).fetchone()
+
+
 #Проверка на наличие продуктов в базе
 def check_products():
     checker = sql.execute('SELECT * FROM products;')
