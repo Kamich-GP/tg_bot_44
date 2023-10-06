@@ -57,7 +57,7 @@ def check_pr(id):
 
 #Вывод названий продуктов с их id
 def get_pr_id():
-    return sql.execute('SELECT id, pr_name, pr_count FROM products;').fetchall()
+    return sql.execute('SELECT id, pr_name, pr_count, pr_price FROM products;').fetchall()
 def get_pr_name_id():
     products = sql.execute('SELECT id, pr_name, pr_count FROM products;').fetchall()
     #Отсортировали продукты, кол-во которых больше 0
@@ -76,4 +76,46 @@ def check_products():
         return True
     else:
         return False
+
+
+##Методы для корзины##
+#Добавление продукта в корзину
+def add_to_cart(user_id, user_product, pr_quantity, total):
+        sql.execute('INSERT INTO cart VALUES(?, ?, ?, ?);',
+                    (user_id, user_product, pr_quantity, total))
+        #Фиксируем изменения
+        connection.commit()
+        #Алгоритм убывания товара
+        amount = sql.execute('SELECT pr_count FROM products WHERE pr_name=?;',
+                             (user_product,)).fetchone()
+        sql.execute(f'UPDATE products SET pr_count={amount[0] - pr_quantity} '
+                    f'WHERE pr_name=?;', (user_product,))
+        # Фиксируем изменения
+        connection.commit()
+
+#Удаление из корзины
+def clear_cart(user_id):
+    pr_name = sql.execute('SELECT user_product FROM cart WHERE user_id=?;', (user_id,)).fetchone()
+    amount = sql.execute('SELECT pr_count FROM products WHERE pr_name=?;',
+                         (pr_name[0],)).fetchone()[0]
+    pr_quantity = sql.execute('SELECT product_quantity FROM cart WHERE user_id=?;',
+                              (user_id,)).fetchone()[0]
+    sql.execute(f'UPDATE products SET pr_count={amount + pr_quantity} WHERE pr_name=?;',
+                (pr_name[0],))
+    # Фиксируем изменения
+    connection.commit()
+    sql.execute('DELETE FROM cart WHERE user_id=?;', (user_id,))
+    # Фиксируем изменения
+    connection.commit()
+
+#Отображение корзины
+def show_cart(user_id):
+    return sql.execute('SELECT user_product, product_quantity, total FROM cart WHERE '
+                       'user_id=?;', (user_id,))
+
+def ordered(user_id):
+    sql.execute('DELETE FROM cart WHERE user_id=?;', (user_id,))
+    # Фиксируем изменения
+    connection.commit()
+
 
