@@ -31,7 +31,8 @@ def admin_menu():
     but2 = types.KeyboardButton('Удалить продукт')
     but3 = types.KeyboardButton('Перейти в меню бота')
     #Добавить кнопку в пространство
-    kb.add(but1, but2, but3)
+    kb.add(but1, but2)
+    kb.row(but3)
     return kb
 
 #Кнопки потверждения удаления продукта
