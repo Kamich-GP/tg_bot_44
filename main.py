@@ -3,7 +3,7 @@ import telebot, buttons as bt, database as db
 from geopy import Nominatim
 
 #Создаем объект бота
-bot = telebot.TeleBot('Ваш токен')
+bot = telebot.TeleBot('6407944506:AAEpMoGMxo4mxPnh0hFbdNxqmwnxKC9aEIU')
 #Использование карт
 geolocator = Nominatim(user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36')
 #Временные данные
@@ -186,6 +186,12 @@ def act(message):
             bot.send_message(admin_id, 'Товаров пока нет!')
             # Переход на этап выбора
             bot.register_next_step_handler(message, act)
+    elif message.text == 'Перейти в меню бота':
+        products = db.get_pr_id()
+        bot.send_message(admin_id, 'Добро пожаловать!',
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
+        bot.send_message(admin_id, 'Выберите пункт меню',
+                         reply_markup=bt.main_menu(products))
 def get_pr_name(message):
     admin_id = 791555605
     product_name = message.text
